@@ -1,7 +1,10 @@
-import string
+import string, operator
 
 def listadd(*ls):
      return map(lambda *l: sum(l), *ls)
+
+def listmul(*ls):
+     return map(lambda *l: reduce(operator.mul,l), *ls)
 
 def partition(l, n):
     return [l[i:i+n] for i in xrange(0, len(l), n)]
@@ -20,16 +23,17 @@ class BasePrinter(object):
     def __init__(self):
         self.up()
 
-    def abspos(self, x=0, y=0):
-        return listadd(self.origin, (x, y))
+    def realpos(self, x=0, y=0):
+        return listmul(
+            listadd(self.origin, (x, y)),
+            (self.xscale, self.yscale))
 
     def _to(self, x, y):
         raise NotImplementedError
 
     def to(self, x, y):
+        self._to(*self.realpos(x, y))
         self.position = (x, y)
-        (x, y) = self.abspos(x, y)
-        self._to(x * self.xscale, y * self.yscale)
 
     def toandfro(self, x, y):
         p = self.position
