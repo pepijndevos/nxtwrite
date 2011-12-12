@@ -6,7 +6,7 @@ from time import sleep
 class NxtPrinter(BasePrinter):
 
     xscale = 10
-    yscale = -40
+    yscale = -20
 
     power = 20
 
@@ -14,6 +14,8 @@ class NxtPrinter(BasePrinter):
         self.xmotor = xmotor
         self.ymotor = ymotor
         self.penmotor = penmotor
+        
+        self.calib()
 
         pool = ThreadPool()
 
@@ -21,7 +23,14 @@ class NxtPrinter(BasePrinter):
             pool.map(self.turn, moves)
 
         self.move = submit
-    
+   
+    def calib(self):
+        self.penmotor.run(-60)
+        sleep(1)
+        self.penmotor.idle()
+	self.downtacho = self.penmotor.get_tacho().tacho_count
+        self.up()
+
     def turn(self, args):
         motor = args[0]
         steps = args[1]
@@ -31,15 +40,12 @@ class NxtPrinter(BasePrinter):
             motor.turn(power, abs(steps))
 
     def up(self):
-        self.penmotor.run(60)
-        sleep(0.5)
-        self.penmotor.brake()
-
+        steps = 0 - self.penmotor.get_tacho().tacho_count
+        self.turn([self.penmotor, steps])
 
     def down(self):
-        self.penmotor.run(-60)
-        sleep(0.5)
-        self.penmotor.brake()
+        steps = self.downtacho - self.penmotor.get_tacho().tacho_count
+        self.turn([self.penmotor, steps])
 
     def _to(self, x, y):
         xtacho = self.xmotor.get_tacho().tacho_count

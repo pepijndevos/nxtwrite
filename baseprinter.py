@@ -38,9 +38,7 @@ class BasePrinter(object):
     def toandfro(self, x, y):
         p = self.position
         self.to(x, y)
-        self.up()
         self.to(*p)
-        self.down()
 
     def up(self, x, y):
         raise NotImplementedError
